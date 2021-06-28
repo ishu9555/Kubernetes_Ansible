@@ -1,0 +1,78 @@
+---
+- name: Set up master & worker in K8s cluster
+  hosts: k8
+  tasks:
+
+    - name: selinux disabled
+      selinux:
+        state: disabled
+      tags: selinux
+
+    - name: disable swap
+      shell:
+        sed -i '/swap/d' /etc/fstab; swapoff -a; swapon -s
+
+      shell:
+        sysctl -p  
+    
+    - name: add k8s repo
+      yum_repository:
+        name: Kubernetes
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        enabled: yes
+        description: kubernetes repo
+        gpgcheck: no
+
+- name: setup master server
+  hosts: master
+  tasks:
+
+    - name: Install all packages in master nodes 
+      yum:
+        name:
+          - wget
+          - curl
+          - kubelet
+          - docker
+          - kubeadm
+          - bash-completion
+        state: latest
+      tags: install  
+
+    - name: start & enable docker on M & W
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop: 
+        - docker
+        - kubelet 
+
+    - name: enable bash completion   
+      shell:
+        kubectl completion bash >> /etc/bash_completion.d/kubectl
+
+        
+- name: setup worker server
+  hosts: worker
+  tasks:
+
+    - name: Install all packages in worker nodes 
+      yum:
+        name:
+          - wget
+          - curl
+          - kubelet
+          - docker
+          - kubeadm
+        state: latest
+      tags: install  
+
+    - name: start & enable docker on M & W
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop: 
+        - docker
+        - kubelet  
