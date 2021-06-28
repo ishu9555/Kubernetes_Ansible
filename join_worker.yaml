@@ -1,0 +1,13 @@
+---
+- name: Join WorkerNOdes
+  hosts: worker
+  tasks: 
+    - name: shell command for joining workrs
+      shell:
+       kubeadm join master1:6443 --token v4ye8n.hg8j07fcvqo6zsck --discovery-token-ca-cert-hash sha256:fa600be285cd99cb9044526cff30c4c7a014f9379625ce02f38f7b31abb313d5
+
+      register: init_info
+
+    - name: display info of kubeadm init
+      debug:
+        var: init_info 
