@@ -1,0 +1,12 @@
+---
+- name: Initiate kubernetes cluster
+  hosts: master1
+  tasks: 
+    - name: shell command for Initiating cluster
+      shell:
+        kubeadm init --control-plane-endpoint "master1:6443" --upload-certs --pod-network-cidr=172.18.0.0/16 --ignore-preflight-errors=numCPU 
+      register: init_info
+
+    - name: display info of kubeadm init
+      debug:
+        var: init_info 
