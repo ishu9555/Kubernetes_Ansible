@@ -1,5 +1,5 @@
 ---
-- name: Join WorkerNOdes
+- name: Join WorkerNodes
   hosts: worker
   tasks: 
     - name: shell command for joining workrs
