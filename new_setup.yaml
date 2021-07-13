@@ -7,14 +7,27 @@
       selinux:
         state: disabled
       tags: selinux
-
+      
+    - name: Let iptables see bridged traffic.
+      sysctl:
+        name: "{{ item }}"
+        value: '1'
+        state: present
+      loop:
+        - net.bridge.bridge-nf-call-iptables
+        - net.bridge.bridge-nf-call-ip6tables
+      when: >
+        ansible_distribution != 'Debian'
+        or ansible_distribution_major_version | int < 10
+        
+    - name: reload sysctl conf
+      shell:
+        sysctl -p          
+        
     - name: disable swap
       shell:
         sed -i '/swap/d' /etc/fstab; swapoff -a; swapon -s
 
-      shell:
-        sysctl -p  
-    
     - name: add k8s repo
       yum_repository:
         name: Kubernetes
@@ -39,7 +52,7 @@
         state: latest
       tags: install  
 
-    - name: start & enable docker on M & W
+    - name: start & enable docker on Master
       service:
         name: "{{ item }}"
         state: started
@@ -68,7 +81,7 @@
         state: latest
       tags: install  
 
-    - name: start & enable docker on M & W
+    - name: start & enable docker on Worker
       service:
         name: "{{ item }}"
         state: started
